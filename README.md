@@ -16,15 +16,20 @@ CSDN:http://blog.csdn.net/hnsugar
   
 ##二.原理
 　　
+  
   简述原理：创建一个表，表结构包括key、value和lasttime等，分别存储键值和保存时间，其他的都是备用，系统的SQLiteOpenHelper有onCreat和onUpgrade方法，触发这两个方法后调用检查数据方法，用反射得到HistoryCache.class的所有属性，遍历属性集合查看是否有key为相应属性的数据，有就不管，没有就添加，数据库表里数据多出的数据被删除，这就是用反射根据类属性动态控制表数据了（不敢说表结构）。剩下的就是update数据和取数据了。
 ##三.为什么不动态改变表结构？
+
 
 　　仔细看下图，表结构是固定的，有多少条数据也是固定的，根据HistoryCache类决定，但是，数据库增删数据快还是更改表结构快？当然是数据啦，每条数据就是一条缓存，而且，同一个缓存只有一个，只能被更新。如果在app运行时可以随意添加key，那。。。。再次拿缓存就麻烦了，数据库会越来越大，我觉得一条数据代表特定意义的缓存是合理的。
 重要的是，结构有多少条是开发时就订好了，缓存哪里的数据是一一对应的，改不了，这样不会出现脏数据。
 　　
+  
   基于这种想法，缓存只有获取get方法和更新update方法两个。
 　　
+  
   说明一下：截图内容是用的https://github.com/amitshekhariitbhu/Android-Debug-Database  这个库可以直接访问局域网手机的数据库，调试时很方便的。推荐
+  
 ![这里写图片描述](http://img.blog.csdn.net/20170314153438086?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvaG5zdWdhcg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 ##四.开始写代码
