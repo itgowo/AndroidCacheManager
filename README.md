@@ -14,16 +14,20 @@ CSDN:http://blog.csdn.net/hnsugar
 　　如果断网了，app页面还有数据，提示断网，是不是显示不单调了，体验会好不少。有的app断网了就是大白板。。。。说句心里话，我看见大白板的app就想卸载了。
   
 ##二.原理
-　　简述原理：创建一个表，表结构包括key、value和lasttime等，分别存储键值和保存时间，其他的都是备用，系统的SQLiteOpenHelper有onCreat和onUpgrade方法，触发这两个方法后调用检查数据方法，用反射得到HistoryCache.class的所有属性，遍历属性集合查看是否有key为相应属性的数据，有就不管，没有就添加，数据库表里数据多出的数据被删除，这就是用反射根据类属性动态控制表数据了（不敢说表结构）。剩下的就是update数据和取数据了。
+　　
+  简述原理：创建一个表，表结构包括key、value和lasttime等，分别存储键值和保存时间，其他的都是备用，系统的SQLiteOpenHelper有onCreat和onUpgrade方法，触发这两个方法后调用检查数据方法，用反射得到HistoryCache.class的所有属性，遍历属性集合查看是否有key为相应属性的数据，有就不管，没有就添加，数据库表里数据多出的数据被删除，这就是用反射根据类属性动态控制表数据了（不敢说表结构）。剩下的就是update数据和取数据了。
 ##三.为什么不动态改变表结构？
 
 　　仔细看下图，表结构是固定的，有多少条数据也是固定的，根据HistoryCache类决定，但是，数据库增删数据快还是更改表结构快？当然是数据啦，每条数据就是一条缓存，而且，同一个缓存只有一个，只能被更新。如果在app运行时可以随意添加key，那。。。。再次拿缓存就麻烦了，数据库会越来越大，我觉得一条数据代表特定意义的缓存是合理的。
 重要的是，结构有多少条是开发时就订好了，缓存哪里的数据是一一对应的，改不了，这样不会出现脏数据。
-　　基于这种想法，缓存只有获取get方法和更新update方法两个。
-　　说明一下：截图内容是用的https://github.com/amitshekhariitbhu/Android-Debug-Database  这个库可以直接访问局域网手机的数据库，调试时很方便的。推荐
+　　
+  基于这种想法，缓存只有获取get方法和更新update方法两个。
+　　
+  说明一下：截图内容是用的https://github.com/amitshekhariitbhu/Android-Debug-Database  这个库可以直接访问局域网手机的数据库，调试时很方便的。推荐
 ![这里写图片描述](http://img.blog.csdn.net/20170314153438086?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvaG5zdWdhcg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 ##四.开始写代码
+
 ###1.创建HistoryCache类
 	  /**
 	     * Created by lujianchao on 2016/11/29.
@@ -50,6 +54,7 @@ CSDN:http://blog.csdn.net/hnsugar
 
 ###2.写SQLiteOpenHelper
 	sql语句
+	
 	　  private static final String CREATE_CacheTABLE = "create table historycache (id integer primary key autoincrement, key text, value text, lasttime long, bak text, flag text)";
  
 提示，我定义的是传入的类的名字和表名是同一个，自定义的dbhelper内封装了根据类属性动态改变数据结构的方法，只在数据库升级时执行。
@@ -127,11 +132,13 @@ CSDN:http://blog.csdn.net/hnsugar
 ```
  
 ###3.写CacheManager管理类
+
  　　根据之前的分析，我们只需要updateCache和getCache方法，还有就是deleteDatabase。
  　　
  　　**1.写updateCache()方法：**
  　　
  　　根据需求，需要根据key更新value值，所以方法如下：
+   
 ```
    /**
      * 更新缓存
@@ -144,6 +151,7 @@ CSDN:http://blog.csdn.net/hnsugar
     }
 ```
 一直点下去调用方法是不是很好用呢，我的android tips分类里会介绍如何自定义模板。
+
 
 ```
 /**
@@ -171,6 +179,7 @@ CSDN:http://blog.csdn.net/hnsugar
         }
     }
 ```
+
 不能手动更新id、key和lasttime，这些是自动的，可以手动设置就出问题了，道理大家都懂的<(￣︶￣)>
 
 忘了介绍CacheEntity这个类了，代码如下：
@@ -293,6 +302,7 @@ CSDN:http://blog.csdn.net/hnsugar
     }
 		    
 ###五.调用总结
+
 	 public void test(View mView){
 	        CacheManager.updateCache (CacheManager.HistoryCache.BannerList,"{\"name\":\"张三\",\"age\":34}");
 	        Toast.makeText (this,CacheManager.getCache (CacheManager.HistoryCache.BannerList).getValue (),Toast.LENGTH_LONG).show ();
