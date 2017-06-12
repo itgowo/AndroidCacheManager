@@ -11,6 +11,7 @@ GitHub：https://github.com/hnsugar
 CSDN:http://blog.csdn.net/hnsugar
 
 ##一.首先大家会问，为什么要用缓存？
+
 　　如果断网了，app页面还有数据，提示断网，是不是显示不单调了，体验会好不少。有的app断网了就是大白板。。。。说句心里话，我看见大白板的app就想卸载了。
   
 ##二.原理
@@ -29,6 +30,7 @@ CSDN:http://blog.csdn.net/hnsugar
 ##四.开始写代码
 
 ###1.创建HistoryCache类
+
 	  /**
 	     * Created by lujianchao on 2016/11/29.
 	     * 数据结构
